@@ -1,0 +1,176 @@
+#package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
+
+load("@npm_angular_bazel//:index.bzl", "ng_module")
+load("@npm_bazel_karma//:index.bzl", "ts_web_test_suite")
+load("@build_bazel_rules_nodejs//:defs.bzl", "rollup_bundle", "history_server")
+load("@build_bazel_rules_nodejs//internal/web_package:web_package.bzl", "web_package")
+load("@npm_bazel_typescript//:index.bzl", "ts_devserver", "ts_library")
+load("@io_bazel_rules_sass//:defs.bzl", "multi_sass_binary", "sass_binary")
+
+# ============== npm_angular_bazel ==============
+
+# We don't import from these, but the generated ngfactory code will
+NG_FACTORY_ADDED_IMPORTS = [
+    "@npm//@angular/animations",
+    "@npm//@angular/cdk",
+    "@npm//@angular/material",
+    "@npm//@angular/forms",
+]
+
+ng_module(
+    name = "app",
+    srcs = glob(["*.ts"]),
+    assets = ["app.component.html"],
+    tsconfig = "//src:tsconfig.json",
+    deps = NG_FACTORY_ADDED_IMPORTS + [
+        "//src/shared/material",
+        "@npm//@angular/core",
+        "@npm//@angular/platform-browser",
+        "@npm//@angular/router",
+        "@npm//@ngrx/store",
+        "@npm//@types",
+        "@npm//rxjs",
+    ],
+)
+
+# ===============================================
+
+# =============== npm_bazel_karma ===============
+
+ts_web_test_suite(
+    name = "test",
+    srcs = [
+        "@npm//:node_modules/tslib/tslib.js",
+    ],
+    runtime_deps = [
+        ":initialize_testbed",
+    ],
+    # do not sort
+    bootstrap = [
+        "@npm//:node_modules/zone.js/dist/zone-testing-bundle.js",
+        "@npm//:node_modules/reflect-metadata/Reflect.js",
+    ],
+    browsers = [
+        "@io_bazel_rules_webtesting//browsers:chromium-local",
+    ],
+    deps = [
+        ":rxjs_umd_modules",
+        ":test_lib",
+        "@npm//karma-jasmine",
+    ],
+)
+
+# ===============================================
+
+# ========== build_bazel_rules_nodejs ===========
+
+rollup_bundle(
+    name = "bundle",
+    entry_point = ":main.prod.ts",
+    deps = [
+        ":src",
+        "@npm//@angular/router",
+        "@npm//rxjs",
+    ],
+)
+
+history_server(
+    name = "prodserver",
+    data = [":prodapp"],
+    templated_args = ["src/prodapp"],
+)
+
+# -----------------------------------------------
+
+web_package(
+    name = "prodapp",
+    assets = [
+        # do not sort
+        "@npm//:node_modules/zone.js/dist/zone.min.js",
+        ":bundle.min.js",
+        ":global_stylesheet",
+    ],
+    data = [
+        "favicon.ico",
+    ],
+    index_html = "index.html",
+)
+
+# ===============================================
+
+filegroup(
+    name = "rxjs_umd_modules",
+    srcs = [
+        # do not sort
+        "@npm//:node_modules/rxjs/bundles/rxjs.umd.js",
+        ":rxjs_shims.js",
+    ],
+)
+
+# ============ npm_bazel_typescript =============
+
+ts_devserver(
+    name = "devserver",
+    port = 4200,
+    entry_module = "project/src/main.dev",
+    serving_path = "/bundle.min.js",
+    scripts = [
+        "@npm//:node_modules/tslib/tslib.js",
+        ":rxjs_umd_modules",
+    ],
+    static_files = [
+        "@npm//:node_modules/zone.js/dist/zone.min.js",
+        ":global_stylesheet",
+    ],
+    data = [
+        "favicon.ico",
+    ],
+    index_html = "index.html",
+    deps = [":src"],
+)
+
+ts_library(
+    name = "test_lib",
+    testonly = 1,
+    srcs = glob(["**/*.spec.ts"]),
+    deps = [
+        ":src",
+        "@npm//@angular/core",
+        "@npm//@angular/router",
+        "@npm//@types",
+    ],
+)
+
+ts_library(
+    name = "initialize_testbed",
+    testonly = 1,
+    srcs = [
+        "initialize_testbed.ts",
+    ],
+    deps = [
+        "@npm//@angular/core",
+        "@npm//@angular/platform-browser-dynamic",
+        "@npm//@types",
+    ],
+)
+
+# ===============================================
+
+# ============= io_bazel_rules_sass =============
+
+multi_sass_binary(
+    name = "styles",
+    srcs = glob(
+      include = ["**/*.scss"],
+      exclude = ["styles.scss"],
+    ),
+)
+
+sass_binary(
+  name = "global_stylesheet",
+  src = glob(["styles.css", "styles.scss"])[0],
+  output_name = "global_stylesheet.css",
+)
+
+# ===============================================
