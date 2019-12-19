@@ -1,0 +1,46 @@
+<div>
+    <ng-content></ng-content>
+
+    <mat-toolbar color="primary" class="fixed-bottom">
+        <mat-toolbar-row fxLayout="row" fxLayoutAlign ="space-around center">
+            <ng-container *ngFor="let btn of leftButtons">
+                <ng-container *ngIf="!btn.isMenu">
+                    <button mat-icon-button (click)="btn.click()" *ngIf="btn.isDisplayable()">
+                        <mat-icon>{{ btn.icon }}</mat-icon>
+                    </button>
+                </ng-container>
+                
+                <ng-container *ngIf="btn.isMenu">
+                    <mat-menu #appMenu="matMenu">
+                        <button mat-menu-item>Settings</button>
+                        <button mat-menu-item>Help</button>
+                    </mat-menu>
+                    <div mat-icon-button [matMenuTriggerFor]="appMenu">
+                        <mat-icon>more_vert</mat-icon>
+                    </div>
+                </ng-container>
+            </ng-container>
+            
+            <ng-container *ngFor="let btn of rightButtons">
+                <ng-container *ngIf="!btn.isMenu">
+                    <button mat-icon-button (click)="btn.click()" *ngIf="btn.isDisplayable()">
+                        <mat-icon>{{ btn.icon }}</mat-icon>
+                    </button>
+                </ng-container>
+                
+                <ng-container *ngIf="btn.isMenu">
+                    <button mat-icon-button (click)="updateMenu(btn)" [matMenuTriggerFor]="appMenu">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                </ng-container>
+            </ng-container>            
+        </mat-toolbar-row>
+    </mat-toolbar>
+    
+    <mat-menu #appMenu="matMenu">
+        <button *ngFor="let btn of menuItems" mat-menu-item (click)="btn.click()">
+            <mat-icon *ngIf="btn.icon">{{ btn.icon }}</mat-icon>
+            <span>{{ btn.text }}</span>
+        </button>
+    </mat-menu>
+</div>
