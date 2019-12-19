@@ -1,0 +1,19 @@
+<ng-container *ngIf="calendar?.length">
+    <div class="themed-text month" fxFlexFill fxLayout="row wrap" fxLayoutAlign="flex-start" *ngFor="let month of calendar">
+        <div class="themed-text" fxFlexFill fxLayout="row wrap" fxLayoutAlign="flex-start">
+            <span fxFlex="100">
+                {{ month.name }}
+            </span>
+            
+            <span class="day previousMonth" fxFlex="13" fxLayout="row" fxLayoutAlign="center center" *ngFor="let day of getWeekDaysOfLastMonth(month)">
+                {{ day }}
+            </span>
+            
+            <span class="day" [class.clickable]="isClickable && !day.isUserHoliday" fxFlex="13" *ngFor="let day of month.days" (click)="onDayClicked(day)"
+                [class.selected]="day.selected" [class.userHoliday]="day.isUserHoliday" [class.holidayChoice]="day.temporal" fxLayout="row" fxLayoutAlign="center center">
+                
+                {{ getDay(day.date) }}
+            </span>
+        </div>
+    </div>
+</ng-container>
