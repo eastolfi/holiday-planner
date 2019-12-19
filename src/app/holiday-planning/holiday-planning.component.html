@@ -1,0 +1,90 @@
+<form [formGroup]="holidayForm" style="margin-bottom: 100px">
+    <mat-grid-list cols="3" rowHeight="2:1">
+        <!-- Year -->
+        <mat-grid-tile>
+            <mat-form-field>
+                <mat-label>Year</mat-label>
+                <mat-select name="currentYear" formControlName="currentYear" ngDefaultControl>
+                    <mat-option *ngFor="let year of years" [value]="year">{{ year }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </mat-grid-tile>
+        
+        <!-- Forfait -->
+        <mat-grid-tile>
+            <mat-form-field class="example-full-width">
+                <input type="number" matInput placeholder="Days to work" formControlName="forfait" />
+            </mat-form-field>
+        </mat-grid-tile>
+    
+        <!-- Paid Holidays -->
+        <mat-grid-tile>
+            <mat-form-field class="example-full-width">
+                <input type="number" matInput placeholder="Paid Days" formControlName="paidHolidays" />
+            </mat-form-field>
+        </mat-grid-tile>
+
+        <!-- Days in Year -->
+        <mat-grid-tile>
+            <mat-form-field class="example-full-width">
+                <input matInput placeholder="Days in the Year" [value]="daysInYear" disabled />
+            </mat-form-field>
+        </mat-grid-tile>
+
+        <!-- Personal Days -->
+        <mat-grid-tile>
+            <mat-form-field class="example-full-width">
+                <input matInput placeholder="Personal Days" [value]="personalDays" disabled />
+            </mat-form-field>
+        </mat-grid-tile>
+
+        <!-- Worked Days -->
+        <mat-grid-tile>
+            <mat-form-field class="example-full-width">
+                <input matInput placeholder="Days Worked" [value]="workedDays" disabled />
+            </mat-form-field>
+        </mat-grid-tile>
+    </mat-grid-list>
+  
+
+    <!-- Holidays -->
+    <mat-grid-list cols="4" rowHeight="2:1" formArrayName="userHolidays" *ngIf="false && userHolidaysForm.value">
+        <div *ngFor="let userHoliday of userHolidaysForm.controls; index as i">
+            <div formGroupName="{{i}}">
+                <div formGroupName="start">
+                    <mat-grid-tile>
+                        <mat-form-field>
+                            <input matInput [matDatepicker]="dpStart" placeholder="From" formControlName="date" />
+                            <mat-datepicker-toggle matSuffix [for]="dpStart"></mat-datepicker-toggle>
+                            <mat-datepicker #dpStart></mat-datepicker>
+                        </mat-form-field>
+                    </mat-grid-tile>
+                    
+                    <mat-grid-tile>
+                        <mat-checkbox class="example-margin" formControlName="fullDay" labelPosition="before">Full Day</mat-checkbox>
+                    </mat-grid-tile>
+                </div>
+                
+                <div formGroupName="end">
+                    <mat-grid-tile>
+                        <mat-form-field>
+                            <input matInput [matDatepicker]="dpEnd" placeholder="To" formControlName="date" />
+                            <mat-datepicker-toggle matSuffix [for]="dpEnd"></mat-datepicker-toggle>
+                            <mat-datepicker #dpEnd></mat-datepicker>
+                        </mat-form-field>
+                    </mat-grid-tile>
+                    
+                    <mat-grid-tile>
+                        <mat-checkbox class="example-margin" formControlName="fullDay" labelPosition="before">Full Day</mat-checkbox>
+                    </mat-grid-tile>
+                </div>
+            </div>
+        </div>
+    </mat-grid-list>
+  
+    <hld-calendar #calendar="hldCalendar" [year]="currentYear" [userHolidays]="userHolidays"
+        (holidaysSelect)="onHolidaysSelected($event)"
+    ></hld-calendar>
+  
+    <!-- <hld-fab-dial [options]="fabOptions"></hld-fab-dial> -->
+</form>
